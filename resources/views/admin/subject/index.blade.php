@@ -16,6 +16,10 @@
         asdfads
         {{-- we will build card layout next --}}
     </div>
+    
+    <div id="table-container">
+        Loading...
+    </div>
 
     <x-datatable id="subjectsTable" :columns="[
         ['data' => 'id', 'label' => 'ID'],
