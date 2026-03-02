@@ -1,0 +1,259 @@
+/* =============================================================
+   Subject Module
+   Path: public/adminend/css/subject.css
+   Bootstrap: v4.0.0-beta (no gap utility support)
+   ============================================================= */
+
+/* ----------------------------------------------------------
+   Filter: search icon overlay
+   ---------------------------------------------------------- */
+.search-input-wrap {
+    position: relative;
+}
+.search-input-wrap .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 11px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1;
+    color: #999;
+}
+.search-input-wrap .form-control {
+    padding-left: 34px;
+}
+
+/* ----------------------------------------------------------
+   Filter: icon badge box
+   ---------------------------------------------------------- */
+.filter-icon-badge {
+    width: 34px;
+    height: 34px;
+    background: #eef2ff;
+    border-radius: 6px;
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+/* ----------------------------------------------------------
+   Filter: per-page select width
+   ---------------------------------------------------------- */
+/* #perPageSelect {
+    width: 80px;
+    display: inline-block;
+    vertical-align: middle;
+} */
+
+/* ----------------------------------------------------------
+   Filter: show row (per-page + reset inline)
+   Bootstrap 4.0 beta has no gap — use margins instead
+   ---------------------------------------------------------- */
+.show-row {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+}
+.show-row > * + * {
+    margin-left: 8px;
+}
+
+/* ----------------------------------------------------------
+   Toolbar: inline group spacing
+   ---------------------------------------------------------- */
+.toolbar-group {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+}
+.toolbar-group > * + * {
+    margin-left: 8px;
+}
+
+/* ----------------------------------------------------------
+   View toggle: active state
+   ---------------------------------------------------------- */
+#viewToggle .btn.active {
+    background: #4680ff;
+    color: #fff;
+    border-color: #4680ff;
+}
+
+/* ----------------------------------------------------------
+   Card: subject code — always single line
+   ---------------------------------------------------------- */
+.subj-code {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4680ff;
+    margin-bottom: 8px;
+}
+
+/* ----------------------------------------------------------
+   Card footer: force badge + buttons on same row
+   Adminty card-footer may not be flexbox by default
+   ---------------------------------------------------------- */
+.card-footer {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: #fafbfc;
+    border-top: 1px solid #f0f2f5;
+}
+
+/* ----------------------------------------------------------
+   Status badges
+   ---------------------------------------------------------- */
+.badge-active,
+.badge-inactive {
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    -webkit-align-items: center;
+    align-items: center;
+    border-radius: 20px;
+    padding: 3px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-active   { background: #e6f9f0; color: #1a9a5c; }
+.badge-inactive { background: #fff3e0; color: #e65100; }
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+.dot-active   { background: #1a9a5c; }
+.dot-inactive { background: #e65100; }
+
+/* ----------------------------------------------------------
+   Action buttons (card footer + table)
+   Bootstrap 4.0 beta — use margin instead of gap
+   ---------------------------------------------------------- */
+.srv-actions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+}
+.srv-actions li + li {
+    margin-left: 6px;
+}
+.srv-actions li a,
+.srv-actions li button {
+    display: -webkit-inline-flex;
+    display: inline-flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #e2e5e8;
+    background: #fff;
+    color: #aab0ba;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+    -webkit-transition: color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    transition: color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    outline: none;
+    line-height: 1;
+}
+
+/* Button color */
+.srv-actions li .act-view {
+    color: #4680ff;
+}
+.srv-actions li .act-edit {
+    color: #2ed8b6;
+}
+.srv-actions li .act-archive {
+    color: #ffb64d;
+}
+.srv-actions li .act-delete {
+    color: #ff5252;
+}
+/* Glow hover colours */
+.srv-actions li .act-view:hover {
+    color: #4680ff;
+    border-color: #4680ff;
+    box-shadow: 0 0 0 3px rgba(70, 128, 255, 0.15);
+}
+.srv-actions li .act-edit:hover {
+    color: #2ed8b6;
+    border-color: #2ed8b6;
+    box-shadow: 0 0 0 3px rgba(46, 216, 182, 0.18);
+}
+.srv-actions li .act-archive:hover {
+    color: #ffb64d;
+    border-color: #ffb64d;
+    box-shadow: 0 0 0 3px rgba(255, 182, 77, 0.18);
+}
+.srv-actions li .act-delete:hover {
+    color: #ff5252;
+    border-color: #ff5252;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.15);
+}
+
+/* Table actions: right-aligned */
+.srv-actions.justify-end {
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+}
+
+/* ----------------------------------------------------------
+   Table: vertical alignment & header style
+   ---------------------------------------------------------- */
+#subjectTable td { vertical-align: middle; }
+#subjectTable th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #888;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+.sortable { cursor: pointer; }
+
+/* ----------------------------------------------------------
+   Spinner animation
+   ---------------------------------------------------------- */
+.spin {
+    display: inline-block;
+    -webkit-animation: subj-spin 1s linear infinite;
+    animation: subj-spin 1s linear infinite;
+}
+@-webkit-keyframes subj-spin {
+    from { -webkit-transform: rotate(0deg); }
+    to   { -webkit-transform: rotate(360deg); }
+}
+@keyframes subj-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}

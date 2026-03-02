@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Response;
 use App\Services\SubjectQueryService;
 use App\Exports\SubjectExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -36,44 +37,61 @@ class SubjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = $this->filter($request);
-
-        $subjects = $query
-            ->paginate(10)
-            ->withQueryString();
-
-        return view('admin.subject.index', compact('subjects'));
+        $title = 'Subjects';
+        return view('admin.subject.index', compact('title'));
     }
 
-    private function filter(Request $request)
+    /*
+    |--------------------------------------------------------------------------
+    | DATA — AJAX endpoint for search, filter, sort, paginate
+    |--------------------------------------------------------------------------
+    */
+    public function data(Request $request)
     {
-        $query = \App\Models\Subject::query();
+        $query = Subject::query()->whereNull('deleted_at');
 
-        // Search
+        // 🔍 Search
         if ($request->filled('search')) {
-            $search = $request->search;
-
+            $search = trim($request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        // Sorting
-        $sortBy = $request->get('sort_by', 'id');
-        $sortDir = $request->get('sort_dir', 'desc');
-
-        $allowedSorts = ['id', 'name', 'code', 'created_at'];
-
-        if (!in_array($sortBy, $allowedSorts)) {
-            $sortBy = 'id';
+        // 🎯 Filter by status
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->is_active);
         }
 
-        $query->orderBy($sortBy, $sortDir);
+        // 🔃 Sorting (safe against SQL injection)
+        $allowedSortFields = ['id', 'name', 'code', 'created_at'];
+        $sortField = in_array($request->get('sort_field'), $allowedSortFields)
+            ? $request->get('sort_field')
+            : 'id';
+        $sortOrder = in_array($request->get('sort_order'), ['asc', 'desc'])
+            ? $request->get('sort_order')
+            : 'desc';
 
-        return $query;
+        $query->orderBy($sortField, $sortOrder);
+
+        // 📄 Pagination
+        $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100])
+            ? (int) $request->get('per_page')
+            : 10;
+
+        $subjects = $query->paginate($perPage);
+
+        return response()->json([
+            'data'         => $subjects->items(),
+            'current_page' => $subjects->currentPage(),
+            'last_page'    => $subjects->lastPage(),
+            'total'        => $subjects->total(),
+            'per_page'     => $subjects->perPage(),
+        ]);
     }
 
     /**
@@ -81,7 +99,12 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        dd('WEB Subject Create');
+        $title = 'Create Subject';
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Ready to create subject.',
+        // ]);
+        return view('admin.subject.create', compact('title'));
     }
 
     /**
@@ -89,8 +112,33 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        dd('WEB Subject Store');
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255|unique:subjects,name',
+            'code'        => 'required|string|max:50|unique:subjects,code',
+            'description' => 'nullable|string',
+            'is_active'   => 'boolean',
+        ]);
+
+        try {
+            $subject = Subject::create([
+                'name'        => $validated['name'],
+                'code'        => strtoupper(trim($validated['code'])),
+                'description' => $validated['description'] ?? null,
+                'is_active'   => $validated['is_active'] ?? true,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subject created successfully.',
+                'data'    => $subject,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Subject store error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create subject. Please try again.',
+            ], 500);
+        }
     }
 
     /**
@@ -98,8 +146,12 @@ class SubjectController extends Controller
      */
     public function show(string $id)
     {
-        //
-        dd('WEB Subject Show ' . $id);
+        $subject = Subject::whereNull('deleted_at')->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $subject,
+        ]);
     }
 
     /**
@@ -107,8 +159,12 @@ class SubjectController extends Controller
      */
     public function edit(string $id)
     {
-        //
-        dd('WEB Subject Edit ' . $id);
+        $subject = Subject::whereNull('deleted_at')->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $subject,
+        ]);
     }
 
     /**
@@ -116,8 +172,35 @@ class SubjectController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
-        dd('WEB Subject Update ' . $id);
+        $subject = Subject::whereNull('deleted_at')->findOrFail($id);
+
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255|unique:subjects,name,' . $id,
+            'code'        => 'required|string|max:50|unique:subjects,code,' . $id,
+            'description' => 'nullable|string',
+            'is_active'   => 'boolean',
+        ]);
+
+        try {
+            $subject->update([
+                'name'        => $validated['name'],
+                'code'        => strtoupper(trim($validated['code'])),
+                'description' => $validated['description'] ?? null,
+                'is_active'   => $validated['is_active'] ?? $subject->is_active,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subject updated successfully.',
+                'data'    => $subject->fresh(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Subject update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update subject. Please try again.',
+            ], 500);
+        }
     }
 
     /**
@@ -125,22 +208,59 @@ class SubjectController extends Controller
      */
     public function destroy(string $id)
     {
-        //
-        dd('WEB Subject Destroy ' . $id);
+        $subject = Subject::whereNull('deleted_at')->findOrFail($id);
+
+        try {
+            $subject->delete(); // SoftDeletes: sets deleted_at
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subject deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Subject destroy error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete subject. Please try again.',
+            ], 500);
+        }
     }
 
     /**
      * Export the specified resource.
      */
-    /* public function export(Request $request)
+    public function export(Request $request)
     {
-        $type = $request->type ?? 'csv';
+        $type     = strtolower($request->get('type', 'xlsx'));
         $fileName = 'subjects_' . date('Ymd_His');
 
-        if ($type === 'csv') {
-            return Excel::download(new SubjectExport, $fileName . '.csv');
+        // Build filtered query (reuse same filters as data())
+        $query = Subject::query()->whereNull('deleted_at');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
-        return Excel::download(new SubjectExport, $fileName . '.xlsx');
-    } */
+        if ($request->has('is_active') && $request->is_active !== '') {
+            $query->where('is_active', $request->is_active);
+        }
+
+        $subjects = $query->orderBy('id', 'desc')->get();
+
+        // PDF Export
+        if ($type === 'pdf') {
+            $pdf = Pdf::loadView('admin.subject.export_pdf', compact('subjects'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download($fileName . '.pdf');
+        }
+
+        // Excel / CSV Export via Maatwebsite
+        $exportType = $type === 'csv' ? \Maatwebsite\Excel\Excel::CSV : \Maatwebsite\Excel\Excel::XLSX;
+        return Excel::download(new SubjectExport($subjects), $fileName . '.' . $type, $exportType);
+    }
 }

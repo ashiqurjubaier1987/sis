@@ -64,7 +64,9 @@ Route::middleware('auth')->group(function () {
     /* Subject Routes */
     Route::group(['prefix' => 'subjects'], function () {
         Route::get('/', [App\Http\Controllers\WEB\SubjectController::class, 'index'])->name('subjects.index');
+        Route::get('/data', [App\Http\Controllers\WEB\SubjectController::class, 'data'])->name('subjects.data');
         Route::get('/create', [App\Http\Controllers\WEB\SubjectController::class, 'create'])->name('subjects.create');
+        Route::get('/export', [App\Http\Controllers\WEB\SubjectController::class, 'export'])->name('subjects.export');
         Route::post('/', [App\Http\Controllers\WEB\SubjectController::class, 'store'])->name('subjects.store');
         Route::get('/{id}', [App\Http\Controllers\WEB\SubjectController::class, 'show'])->name('subjects.show');
         Route::get('/{id}/edit', [App\Http\Controllers\WEB\SubjectController::class, 'edit'])->name('subjects.edit');
