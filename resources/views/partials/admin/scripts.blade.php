@@ -1,6 +1,3 @@
-<div>
-    asdffds
-</div>
 <!-- Required Jquery -->
 <script type="text/javascript" src="{{ asset('adminend/bower_components/jquery/js/jquery.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('adminend/bower_components/jquery-ui/js/jquery-ui.min.js') }}"></script>
@@ -36,9 +33,19 @@
 <script src="{{ asset('adminend/js/pcoded.min.js') }}"></script>
 <script src="{{ asset('adminend/js/menu/menu-hori-fixed.js') }}"></script>
 <script src="{{ asset('adminend/js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
-<script type="text/javascript" src="{{ asset('adminend/pages/dashboard/custom-dashboard.js') }}"></script>
+
+<!-- Switch component js -->
+<script type="text/javascript" src="{{ asset('adminend/bower_components/switchery/js/switchery.min.js') }}"></script>
+
+<!-- Select2 -->
+<script src="{{ asset('adminend/bower_components/select2/js/select2.full.min.js') }}"></script>
+<!-- Sweet Alert -->
+<script type="text/javascript" src="{{ asset('adminend/bower_components/sweetalert/js/sweetalert.min.js') }}"></script>
+
 <!-- Custom js -->
 <script type="text/javascript" src="{{ asset('adminend/js/script.js') }}"></script>
+<!-- SIS Global Helpers -->
+<script type="text/javascript" src="{{ asset('adminend/js/sis-helpers.js') }}"></script>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 @if (env('APP_ENV') === 'production')

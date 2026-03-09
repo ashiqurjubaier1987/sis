@@ -13,6 +13,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::middleware(['web'])->group(function () {
+
 Route::get('clear-all', function () {
     \Illuminate\Support\Facades\Artisan::call('view:clear');
     \Illuminate\Support\Facades\Artisan::call('config:clear');
@@ -50,7 +52,7 @@ Route::middleware('guest')->group(function () {
     })->name('password.reset'); */
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:web')->group(function () {
     /* Auth Route */
 
     Route::get('/logout', [App\Http\Controllers\WEB\Auth\AuthController::class, 'logout'])->name('logout');
@@ -71,9 +73,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}', [App\Http\Controllers\WEB\SubjectController::class, 'show'])->name('subjects.show');
         Route::get('/{id}/edit', [App\Http\Controllers\WEB\SubjectController::class, 'edit'])->name('subjects.edit');
         Route::put('/{id}', [App\Http\Controllers\WEB\SubjectController::class, 'update'])->name('subjects.update');
+        Route::patch('/{id}/toggle', [App\Http\Controllers\WEB\SubjectController::class, 'toggleStatus'])->name('subjects.toggle');
         Route::delete('/{id}', [App\Http\Controllers\WEB\SubjectController::class, 'destroy'])->name('subjects.destroy');
     });
     /* Subject Routes */
 });
 
 // Other web routes can be added here
+
+});

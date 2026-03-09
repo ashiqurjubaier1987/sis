@@ -188,15 +188,19 @@
 
 /* Button color */
 .srv-actions li .act-view {
+    background-color: #4680ff10;
     color: #4680ff;
 }
 .srv-actions li .act-edit {
+    background-color: #2ed8b610;
     color: #2ed8b6;
 }
 .srv-actions li .act-archive {
+    background-color: #ffb64d10;
     color: #ffb64d;
 }
 .srv-actions li .act-delete {
+    background-color: #ff525210;
     color: #ff5252;
 }
 /* Glow hover colours */
@@ -241,10 +245,41 @@
 }
 .sortable { cursor: pointer; }
 
+#show_description{
+    white-space: normal;
+}
+
+/* ----------------------------------------------------------
+   Select2: match Adminty form-control height & style
+   ---------------------------------------------------------- */
+/* select.select2-hidden-accessible {
+    display: none !important;
+}
+.select2-container--default .select2-selection--single {
+    height: 43px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    padding: 6px 12px;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 30px;
+    padding-left: 0;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 41px;
+}*/
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #fff;
+}
+.select2-selection__clear{
+    width: 40px;
+    text-align: center;
+}
+
 /* ----------------------------------------------------------
    Spinner animation
    ---------------------------------------------------------- */
-.spin {
+/* .spin {
     display: inline-block;
     -webkit-animation: subj-spin 1s linear infinite;
     animation: subj-spin 1s linear infinite;
@@ -256,4 +291,19 @@
 @keyframes subj-spin {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
+} */
+
+/* ----------------------------------------------------------
+   Form actions bar (create / edit pages)
+   ---------------------------------------------------------- */
+.form-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+}
+.form-actions-bar .btn,
+.form-actions-bar a.btn {
+    margin: 0 10px 10px 0 !important;
 }

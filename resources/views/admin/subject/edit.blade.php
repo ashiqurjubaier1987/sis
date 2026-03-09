@@ -1,144 +1,201 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Subject')
+@section('title', $title ?? 'Edit Subject')
+
+@push('styles')
+
+@endpush
 
 @section('content')
 <div class="page-body">
-    <div class="row">
-        <div class="col-sm-12">
 
-            {{-- Breadcrumb --}}
-            <div class="page-header card">
-                <div class="row align-items-end">
-                    <div class="col-lg-8">
-                        <div class="page-header-title">
-                            <i class="feather icon-book bg-c-yellow"></i>
-                            <div class="d-inline">
-                                <h5>Edit Subject</h5>
-                                <span>Update subject information</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="page-header-breadcrumb">
-                            <ul class="breadcrumb-title">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('dashboard') }}"><i class="feather icon-home"></i></a>
-                                </li>
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('subjects.index') }}">Subjects</a>
-                                </li>
-                                <li class="breadcrumb-item active">Edit</li>
-                            </ul>
-                        </div>
-                    </div>
+    <!-- Page-header start -->
+    <div class="page-header">
+        <div class="row align-items-end">
+            <div class="col-lg-8">
+                <div class="page-header-title">
+                    <h4 class="f-w-600 m-b-5">Edit Subject</h4>
                 </div>
             </div>
-
-            {{-- Loading state before AJAX fills the form --}}
-            <div id="pageLoader" class="text-center p-t-30 p-b-30">
-                <i class="feather icon-loader spin f-30"></i>
-                <p class="text-muted m-t-10">Loading subject data...</p>
+            <div class="col-lg-4">
+                <div class="page-header-breadcrumb">
+                    <ul class="breadcrumb-title">
+                        <li class="breadcrumb-item" style="float:left;">
+                            <a href="{{ route('dashboard') }}"><i class="feather icon-home"></i></a>
+                        </li>
+                        <li class="breadcrumb-item" style="float:left;">
+                            <a href="#!">Academic Management</a>
+                        </li>
+                        <li class="breadcrumb-item" style="float:left;">
+                            <a href="{{ route('subjects.index') }}">Subject</a>
+                        </li>
+                        <li class="breadcrumb-item" style="float:left;">
+                            <a href="#!">Edit</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
+        </div>
+    </div>
+    <!-- Page-header end -->
 
-            {{-- Form Card (hidden until data loaded) --}}
-            <div class="card d-none" id="editCard">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
                 <div class="card-header">
-                    <h5>Subject Information</h5>
+                    <h5><i class="feather icon-edit-2 m-r-5 text-c-blue"></i> Edit Subject</h5>
                     <div class="card-header-right">
-                        <a href="{{ route('subjects.index') }}" class="btn btn-secondary btn-sm">
-                            <i class="feather icon-arrow-left"></i> Back to List
+                        <a href="{{ route('subjects.index') }}" class="btn btn-light btn-sm">
+                            <i class="feather icon-arrow-left m-r-5"></i> Back to List
                         </a>
                     </div>
                 </div>
                 <div class="card-block">
 
-                    <div id="formAlertError" class="alert alert-danger d-none"></div>
+                    {{-- SweetAlert flash (picked up by SIS.showFlash) --}}
+                    @if (session('success'))
+                        <div id="sis-flash-success" data-message="{{ session('success') }}"></div>
+                    @endif
 
-                    <form id="editSubjectForm">
+                    {{-- Server-side validation errors --}}
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong><i class="feather icon-alert-circle m-r-5"></i> Please fix the following errors:</strong>
+                            <ul class="m-b-0 m-t-5 p-l-20">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    @endif
+
+                    <form id="editSubjectForm"
+                          action="{{ route('subjects.update', $subject->id) }}"
+                          method="POST"
+                          autocomplete="off">
                         @csrf
                         @method('PUT')
 
                         <div class="row">
 
-                            {{-- Name --}}
+                            {{-- Subject Name --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name">Subject Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name"
-                                        placeholder="e.g. Mathematics" maxlength="255">
-                                    <span class="text-danger f-12" id="error_name"></span>
+                                    <label class="f-w-600">
+                                        Subject Name
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           name="name"
+                                           id="name"
+                                           class="form-control @error('name') is-invalid @enderror"
+                                           placeholder="e.g. Mathematics"
+                                           value="{{ old('name', $subject->name) }}"
+                                           required>
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Enter the full subject name.</small>
                                 </div>
                             </div>
 
-                            {{-- Code --}}
+                            {{-- Subject Code --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="code">Subject Code <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="code" name="code"
-                                        placeholder="e.g. MATH101" maxlength="50"
-                                        style="text-transform: uppercase;">
-                                    <span class="text-danger f-12" id="error_code"></span>
+                                    <label class="f-w-600">Subject Code</label>
+                                    <input type="text"
+                                           name="code"
+                                           id="code"
+                                           class="form-control @error('code') is-invalid @enderror"
+                                           placeholder="e.g. MTH-101"
+                                           value="{{ old('code', $subject->code) }}">
+                                    @error('code')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Optional. Must be unique if provided.</small>
                                 </div>
                             </div>
 
-                            {{-- Description --}}
-                            <div class="col-md-12">
+                            {{-- Assign Teachers --}}
+                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="description">Description</label>
-                                    <textarea class="form-control" id="description" name="description"
-                                        rows="4" placeholder="Optional description..."></textarea>
-                                    <span class="text-danger f-12" id="error_description"></span>
+                                    <label class="f-w-600">
+                                        Assign Teacher(s)
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    @php
+                                        $selectedTeachers = old('teacher_ids', $subject->teachers->pluck('id')->toArray());
+                                    @endphp
+                                    <select name="teacher_ids[]" id="teacher_ids" class="form-control @error('teacher_ids') is-invalid @enderror" multiple required>
+                                        @foreach($teachers as $teacher)
+                                            <option value="{{ $teacher->id }}" {{ in_array($teacher->id, $selectedTeachers) ? 'selected' : '' }}>
+                                                {{ $teacher->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('teacher_ids')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Search and assign one or more teachers.</small>
                                 </div>
                             </div>
 
                             {{-- Status --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Status</label>
-                                    <div>
-                                        <div class="checkbox-fade fade-in-primary d-inline-block m-r-20">
-                                            <label>
-                                                <input type="radio" name="is_active" id="status_active" value="1">
-                                                <span class="cr">
-                                                    <i class="cr-icon feather icon-check txt-primary"></i>
-                                                </span>
-                                                <span class="text-success">Active</span>
-                                            </label>
-                                        </div>
-                                        <div class="checkbox-fade fade-in-danger d-inline-block">
-                                            <label>
-                                                <input type="radio" name="is_active" id="status_inactive" value="0">
-                                                <span class="cr">
-                                                    <i class="cr-icon feather icon-check txt-danger"></i>
-                                                </span>
-                                                <span class="text-danger">Inactive</span>
-                                            </label>
-                                        </div>
+                                    <label class="f-w-600">Status</label>
+                                    <div class="status-toggle-wrap d-flex align-items-center">
+                                        <input type="checkbox" id="statusSwitch" class="js-switch"
+                                            @if(old('is_active', $subject->is_active) == '1') checked @endif>
+                                        <span class="m-l-10 status-label f-w-600">
+                                            {{ old('is_active', $subject->is_active) == '1' ? 'Active' : 'Inactive' }}
+                                        </span>
+                                        <input type="hidden" name="is_active" id="isActiveInput"
+                                               value="{{ old('is_active', $subject->is_active) }}">
                                     </div>
-                                    <span class="text-danger f-12" id="error_is_active"></span>
+                                    <small class="form-text text-muted">Active subjects are visible across the system.</small>
                                 </div>
                             </div>
 
-                        </div>{{-- /row --}}
-
-                        <hr>
-                        <div class="row">
+                            {{-- Description --}}
                             <div class="col-md-12">
-                                <button type="submit" class="btn btn-warning" id="submitBtn">
-                                    <i class="feather icon-save"></i> Update Subject
-                                </button>
-                                <a href="{{ route('subjects.index') }}" class="btn btn-secondary m-l-10">
-                                    <i class="feather icon-x"></i> Cancel
-                                </a>
+                                <div class="form-group">
+                                    <label class="f-w-600">Description</label>
+                                    <textarea name="description"
+                                              id="description"
+                                              class="form-control @error('description') is-invalid @enderror"
+                                              rows="4"
+                                              placeholder="Brief description of what this subject covers...">{{ old('description', $subject->description) }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Optional.</small>
+                                </div>
                             </div>
+
+                        </div>{{-- end .row --}}
+
+                        {{-- Form Actions --}}
+                        <input type="hidden" name="save_action" id="saveAction" value="save">
+                        <div class="form-actions-bar">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="feather icon-save m-r-5"></i> Update Subject
+                            </button>
+                            <button type="submit" class="btn btn-success" id="submitAddAnotherBtn"
+                                    onclick="document.getElementById('saveAction').value='save_add_another'">
+                                <i class="feather icon-refresh-cw m-r-5"></i> Save & Continue Editing
+                            </button>
+                            <a href="{{ route('subjects.index') }}" class="btn btn-light">
+                                <i class="feather icon-x m-r-5"></i> Cancel
+                            </a>
                         </div>
 
                     </form>
-
-                </div>{{-- /card-block --}}
-            </div>{{-- /card --}}
-
+                </div>{{-- end .card-block --}}
+            </div>{{-- end .card --}}
         </div>
     </div>
 </div>
@@ -148,98 +205,30 @@
 <script>
 $(document).ready(function () {
 
-    // Extract subject ID from URL: /subjects/{id}/edit
-    const pathParts = window.location.pathname.split('/');
-    const subjectId = pathParts[pathParts.length - 2];
+    // Select2 — Teacher dropdown (multiple)
+    $('#teacher_ids').select2({ placeholder: '— Select Teacher(s) —', allowClear: true, width: '100%' });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load existing subject data
-    |--------------------------------------------------------------------------
-    */
-    $.ajax({
-        url:     `/subjects/${subjectId}/edit`,
-        method:  'GET',
-        success: function (res) {
-            const s = res.data;
-
-            $('#name').val(s.name);
-            $('#code').val(s.code);
-            $('#description').val(s.description || '');
-
-            if (parseInt(s.is_active) === 1) {
-                $('#status_active').prop('checked', true);
-            } else {
-                $('#status_inactive').prop('checked', true);
-            }
-
-            $('#pageLoader').addClass('d-none');
-            $('#editCard').removeClass('d-none');
-        },
-        error: function () {
-            $('#pageLoader').html(`
-                <div class="alert alert-danger">
-                    Failed to load subject. <a href="{{ route('subjects.index') }}">Go back</a>
-                </div>
-            `);
-        }
+    // Switchery — Status toggle
+    var statusEl = document.getElementById('statusSwitch');
+    var switchery = new Switchery(statusEl, { size: 'small', color: '#4680ff' });
+    statusEl.addEventListener('change', function () {
+        var isActive = this.checked ? '1' : '0';
+        $('#isActiveInput').val(isActive);
+        $('.status-label').text(this.checked ? 'Active' : 'Inactive');
     });
 
-    // Auto uppercase code field
+    // Auto-uppercase subject code
     $('#code').on('input', function () {
+        var pos = this.selectionStart;
         $(this).val($(this).val().toUpperCase());
+        this.setSelectionRange(pos, pos);
     });
 
-    // Clear errors on input
-    $('input, textarea').on('input change', function () {
-        const field = $(this).attr('name');
-        if (field) {
-            $(`#error_${field}`).text('');
-            $(this).removeClass('is-invalid');
-        }
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Submit Update
-    |--------------------------------------------------------------------------
-    */
-    $('#editSubjectForm').on('submit', function (e) {
-        e.preventDefault();
-
-        // Clear previous errors
-        $('.text-danger.f-12').text('');
-        $('input, textarea').removeClass('is-invalid');
-        $('#formAlertError').addClass('d-none').text('');
-
-        const $btn = $('#submitBtn');
-        $btn.prop('disabled', true).html('<i class="feather icon-loader spin"></i> Updating...');
-
-        $.ajax({
-            url:    `/subjects/${subjectId}`,
-            method: 'POST',
-            data:   $(this).serialize(), // includes _method=PUT
-            success: function (res) {
-                toastr.success(res.message || 'Subject updated successfully.');
-                window.location.href = '{{ route("subjects.index") }}';
-            },
-            error: function (xhr) {
-                $btn.prop('disabled', false).html('<i class="feather icon-save"></i> Update Subject');
-
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    $.each(errors, function (field, messages) {
-                        $(`#error_${field}`).text(messages[0]);
-                        $(`#${field}`).addClass('is-invalid');
-                    });
-                } else {
-                    $('#formAlertError')
-                        .removeClass('d-none')
-                        .text(xhr.responseJSON?.message || 'Something went wrong. Please try again.');
-                }
-            }
-        });
-    });
+    // SIS global helpers (multi-submit guard + success flash)
+    if (typeof SIS !== 'undefined') {
+        SIS.formGuard('#editSubjectForm');
+        SIS.showFlash();
+    }
 
 });
 </script>

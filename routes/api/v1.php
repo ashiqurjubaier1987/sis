@@ -25,7 +25,7 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
-Route::group(['middleware' => ['auth:sanctum']], function () {
+Route::group(['middleware' => ['auth:sanctum'], 'as' => 'api.'], function () {
     // Route::get('/user', function (Request $request) {
     //     return $request->user();
     // });
@@ -34,4 +34,5 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResource('role', RoleController::class);
     Route::apiResource('permission', PermissionController::class);
 });
-Route::put('subjects/changeStatus/{subject}', SubjectController::class .'@changeStatus');
+// Route::put('subjects/changeStatus/{subject}', SubjectController::class .'@changeStatus');
+Route::put('subjects/changeStatus/{subject}', [SubjectController::class, 'changeStatus']);

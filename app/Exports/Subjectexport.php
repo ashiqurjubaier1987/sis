@@ -14,25 +14,35 @@
 namespace App\Exports;
 
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SubjectExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class SubjectExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
 {
-    protected Collection $subjects;
+    protected array $rows;
 
     public function __construct(Collection $subjects)
     {
-        $this->subjects = $subjects;
+        $this->rows = $subjects->values()->map(function ($subject, $index) {
+            $teachers = $subject->teachers->pluck('name')->join(', ') ?: '—';
+            return [
+                $index + 1,
+                $subject->name,
+                $subject->code ?? '—',
+                $teachers,
+                $subject->description ?? '—',
+                $subject->is_active ? 'Active' : 'Inactive',
+                $subject->created_at ? $subject->created_at->format('d M Y') : '—',
+            ];
+        })->toArray();
     }
 
-    public function collection(): Collection
+    public function array(): array
     {
-        return $this->subjects;
+        return $this->rows;
     }
 
     public function headings(): array
@@ -41,31 +51,16 @@ class SubjectExport implements FromCollection, WithHeadings, WithMapping, WithSt
             '#',
             'Subject Name',
             'Code',
+            'Teacher(s)',
             'Description',
             'Status',
             'Created At',
         ];
     }
 
-    public function map($subject): array
-    {
-        static $index = 0;
-        $index++;
-
-        return [
-            $index,
-            $subject->name,
-            $subject->code,
-            $subject->description ?? '—',
-            $subject->is_active ? 'Active' : 'Inactive',
-            $subject->created_at->format('d M Y'),
-        ];
-    }
-
     public function styles(Worksheet $sheet): array
     {
         return [
-            // Bold header row
             1 => ['font' => ['bold' => true]],
         ];
     }

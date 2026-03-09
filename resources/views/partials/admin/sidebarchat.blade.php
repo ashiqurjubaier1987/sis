@@ -19,7 +19,7 @@
                         data-toggle="tooltip" data-placement="left" title="Josephin Doe">
                         <a class="media-left" href="#!">
                             <img class="media-object img-radius img-radius"
-                                src={{"adminend/images/avatar-3.jpg"}}
+                                src="{{ asset('adminend/images/avatar-3.jpg') }}"
                                 alt="Generic placeholder image ">
                             <div class="live-status bg-success"></div>
                         </a>
@@ -31,7 +31,7 @@
                         data-toggle="tooltip" data-placement="left" title="Lary Doe">
                         <a class="media-left" href="#!">
                             <img class="media-object img-radius"
-                                src={{"adminend/images/avatar-2.jpg"}}
+                                src="{{ asset('adminend/images/avatar-2.jpg') }}"
                                 alt="Generic placeholder image">
                             <div class="live-status bg-success"></div>
                         </a>
@@ -43,7 +43,7 @@
                         data-toggle="tooltip" data-placement="left" title="Alice">
                         <a class="media-left" href="#!">
                             <img class="media-object img-radius"
-                                src={{"adminend/images/avatar-4.jpg"}}
+                                src="{{ asset('adminend/images/avatar-4.jpg') }}"
                                 alt="Generic placeholder image">
                             <div class="live-status bg-success"></div>
                         </a>
@@ -55,7 +55,7 @@
                         data-toggle="tooltip" data-placement="left" title="Alia">
                         <a class="media-left" href="#!">
                             <img class="media-object img-radius"
-                                src={{"adminend/images/avatar-3.jpg"}}
+                                src="{{ asset('adminend/images/avatar-3.jpg') }}"
                                 alt="Generic placeholder image">
                             <div class="live-status bg-success"></div>
                         </a>
@@ -67,7 +67,7 @@
                         data-toggle="tooltip" data-placement="left" title="Suzen">
                         <a class="media-left" href="#!">
                             <img class="media-object img-radius"
-                                src={{"adminend/images/avatar-2.jpg"}}
+                                src="{{ asset('adminend/images/avatar-2.jpg') }}"
                                 alt="Generic placeholder image">
                             <div class="live-status bg-success"></div>
                         </a>
@@ -90,7 +90,7 @@
     <div class="media chat-messages">
         <a class="media-left photo-table" href="#!">
             <img class="media-object img-radius img-radius m-t-5"
-                src={{"adminend/images/avatar-3.jpg"}} alt="Generic placeholder image">
+                src="{{ asset('adminend/images/avatar-3.jpg') }}" alt="Generic placeholder image">
         </a>
         <div class="media-body chat-menu-content">
             <div class="">
@@ -109,7 +109,7 @@
         <div class="media-right photo-table">
             <a href="#!">
                 <img class="media-object img-radius img-radius m-t-5"
-                    src={{"adminend/images/avatar-4.jpg"}} alt="Generic placeholder image">
+                    src="{{ asset('adminend/images/avatar-4.jpg') }}" alt="Generic placeholder image">
             </a>
         </div>
     </div>

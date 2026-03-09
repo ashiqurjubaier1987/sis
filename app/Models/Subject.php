@@ -41,4 +41,13 @@ class Subject extends Model
         'description',
         'is_active',
     ];
+
+    /**
+     * Get the teachers assigned to this subject.
+     */
+    public function teachers()
+    {
+        return $this->belongsToMany(User::class, 'teacher_subjects', 'subject_id', 'teacher_id')
+                    ->withTimestamps();
+    }
 }

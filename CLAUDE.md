@@ -107,6 +107,46 @@ php artisan serve
 4. Run `php artisan key:generate`
 5. Run `php artisan migrate --seed`
 
+## Docker Setup
+- Runs via Laradock: containers `laradock82-workspace-1`, `laradock82-php-fpm-1`, `laradock82-apache2-1`, `laradock82-mysql-1`
+- Artisan commands must run inside the workspace container:
+  ```bash
+  docker exec laradock82-workspace-1 bash -c "cd /var/www/sis && php artisan migrate"
+  ```
+
+## UI/Form Patterns
+- **Create/Edit forms**: Use standard POST with server-side redirect — NOT AJAX/JSON responses
+  - "Save" button → redirect to module index with flash success message
+  - "Save & Add Another" button → redirect back to create page with flash success message
+  - Use `save_action` hidden input to differentiate between the two
+- **Index/listing pages**: Use AJAX for data loading, filtering, sorting, pagination (returns JSON)
+- **Searchable dropdowns**: Use Select2 (`public/adminend/bower_components/select2/`), supports `multiple` for multi-select
+- **Status toggles**: Use Switchery (`public/adminend/bower_components/switchery/`) with hidden input syncing
+- **Flash messages**: Use `<div id="sis-flash-success" data-message="{{ session('success') }}">` + `SIS.showFlash()` (SweetAlert)
+- **Confirm dialogs**: Use `SIS.confirm(options, onConfirm)` for delete/toggle actions (SweetAlert)
+- **Notifications**: Use `notify(msg, "top", "right", "", type, "animated fadeInRight", "animated fadeOutRight")`
+- **Form actions**: Use `.form-actions-bar` class (flexbox with wrap, responsive)
+- **Module CSS**: Each module gets its own CSS file at `public/adminend/css/{module}.css`
+
+## Global Reusable Assets
+- **`public/adminend/js/sis-helpers.js`** — Global JS helpers loaded on all pages:
+  - `SIS.formGuard('#formId')` — multi-submit protection
+  - `SIS.showFlash()` — SweetAlert success flash from `#sis-flash-success` element
+  - `SIS.confirm(options, onConfirm, onCancel)` — SweetAlert confirm dialog
+- **`public/adminend/css/sis-helper.css`** — Global shared CSS for all modules (badges, actions, filters, toolbar, form-actions-bar, etc.)
+
+## Module Status
+
+### Subject Module (Complete)
+- **Tables**: `subjects` (`id`, `name`, `code`, `description`, `is_active`, timestamps, soft deletes), `teacher_subjects` (pivot: `teacher_id` → `users`, `subject_id` → `subjects`, unique constraint)
+- **Model**: `Subject` — fillable: `name`, `code`, `description`, `is_active`; relationship: `teachers()` belongsToMany User via `teacher_subjects` pivot
+- **Controllers**: `WEB/SubjectController` (web views + redirects), `API/V1/SubjectController` (API)
+- **Views**: `admin/subject/` — `index.blade.php` (AJAX listing), `create.blade.php`, `edit.blade.php`, `export_pdf.blade.php`
+- **Create/Edit form fields**: Name (required), Code (optional/unique), Teacher(s) (required/Select2 multiple), Status (Switchery toggle, default active), Description (optional)
+- **Index features**: Card + list views, search/filter/sort/paginate, export (Excel/CSV/PDF), show modal, toggle status, delete — all via SweetAlert confirms
+- **Routes**: `subjects/` prefix — index, data, create, store, show, edit, update, toggle (`PATCH /{id}/toggle`), destroy, export
+- **Permissions**: `subject.create`, `subject.view`, `subject.edit`, `subject.toggle`, `subject.delete`
+
 ## Important Notes
 - **Do not** modify `app.blade.php` layout structure without checking Adminty template dependencies (JS/CSS paths)
 - **Do not** use inline styles — use Adminty's existing CSS classes wherever possible

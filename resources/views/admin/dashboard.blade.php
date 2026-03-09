@@ -506,3 +506,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script type="text/javascript" src="{{ asset('adminend/pages/dashboard/custom-dashboard.js') }}"></script>
+@endpush
