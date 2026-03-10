@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\AcademicLevel;
 use App\Exports\SubjectExport;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -39,7 +40,7 @@ class SubjectController extends Controller
     */
     public function data(Request $request)
     {
-        $query = Subject::with('teachers:id,name')->whereNull('deleted_at');
+        $query = Subject::with(['teachers:id,name', 'level:id,name'])->whereNull('deleted_at');
 
         // 🔍 Search
         if ($request->filled('search')) {
@@ -90,7 +91,8 @@ class SubjectController extends Controller
     {
         $title = 'Create Subject';
         $teachers = User::role('teacher')->orderBy('name')->get(['id', 'name']);
-        return view('admin.subject.create', compact('title', 'teachers'));
+        $levels = AcademicLevel::where('active', true)->orderBy('name')->get(['id', 'name']);
+        return view('admin.subject.create', compact('title', 'teachers', 'levels'));
     }
 
     /**
@@ -99,20 +101,30 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'         => 'required|string|max:255|unique:subjects,name',
-            'code'         => 'nullable|string|max:50|unique:subjects,code',
-            'description'  => 'nullable|string',
-            'is_active'    => 'boolean',
-            'teacher_ids'  => 'required|array|min:1',
-            'teacher_ids.*' => 'exists:users,id',
+            'name'                    => 'required|string|max:255|unique:subjects,name',
+            'code'                    => 'nullable|string|max:50|unique:subjects,code',
+            'description'             => 'nullable|string',
+            'is_active'               => 'boolean',
+            'level_id'                => 'required|exists:academic_levels,id',
+            'teacher_ids'             => 'required|array|min:1',
+            'teacher_ids.*'           => 'exists:users,id',
+            'sms_enroll_student'      => 'boolean',
+            'notify_teacher_enroll'   => 'boolean',
+            'notify_teacher_zero_fee' => 'boolean',
+            'attendance_device_id'    => 'nullable|integer',
         ]);
 
         try {
             $subject = Subject::create([
-                'name'        => $validated['name'],
-                'code'        => !empty($validated['code']) ? strtoupper(trim($validated['code'])) : null,
-                'description' => $validated['description'] ?? null,
-                'is_active'   => $validated['is_active'] ?? true,
+                'name'                    => $validated['name'],
+                'code'                    => !empty($validated['code']) ? strtoupper(trim($validated['code'])) : null,
+                'description'             => $validated['description'] ?? null,
+                'is_active'               => $validated['is_active'] ?? true,
+                'level_id'                => $validated['level_id'] ?? null,
+                'sms_enroll_student'      => $request->has('sms_enroll_student'),
+                'notify_teacher_enroll'   => $request->has('notify_teacher_enroll'),
+                'notify_teacher_zero_fee' => $request->has('notify_teacher_zero_fee'),
+                'attendance_device_id'    => $validated['attendance_device_id'] ?? null,
             ]);
 
             $subject->teachers()->sync($validated['teacher_ids']);
@@ -135,7 +147,7 @@ class SubjectController extends Controller
      */
     public function show(string $id)
     {
-        $subject = Subject::with('teachers:id,name')->whereNull('deleted_at')->findOrFail($id);
+        $subject = Subject::with(['teachers:id,name', 'level:id,name'])->whereNull('deleted_at')->findOrFail($id);
 
         return response()->json([
             'success' => true,
@@ -148,10 +160,11 @@ class SubjectController extends Controller
      */
     public function edit(string $id)
     {
-        $subject = Subject::with('teachers:id,name')->findOrFail($id);
+        $subject = Subject::with(['teachers:id,name', 'level:id,name'])->findOrFail($id);
         $title = 'Edit Subject';
         $teachers = User::role('teacher')->orderBy('name')->get(['id', 'name']);
-        return view('admin.subject.edit', compact('title', 'subject', 'teachers'));
+        $levels = AcademicLevel::where('active', true)->orderBy('name')->get(['id', 'name']);
+        return view('admin.subject.edit', compact('title', 'subject', 'teachers', 'levels'));
     }
 
     /**
@@ -162,20 +175,30 @@ class SubjectController extends Controller
         $subject = Subject::findOrFail($id);
 
         $validated = $request->validate([
-            'name'          => 'required|string|max:255|unique:subjects,name,' . $id,
-            'code'          => 'nullable|string|max:50|unique:subjects,code,' . $id,
-            'description'   => 'nullable|string',
-            'is_active'     => 'boolean',
-            'teacher_ids'   => 'required|array|min:1',
-            'teacher_ids.*' => 'exists:users,id',
+            'name'                    => 'required|string|max:255|unique:subjects,name,' . $id,
+            'code'                    => 'nullable|string|max:50|unique:subjects,code,' . $id,
+            'description'             => 'nullable|string',
+            'is_active'               => 'boolean',
+            'level_id'                => 'required|exists:academic_levels,id',
+            'teacher_ids'             => 'required|array|min:1',
+            'teacher_ids.*'           => 'exists:users,id',
+            'sms_enroll_student'      => 'boolean',
+            'notify_teacher_enroll'   => 'boolean',
+            'notify_teacher_zero_fee' => 'boolean',
+            'attendance_device_id'    => 'nullable|integer',
         ]);
 
         try {
             $subject->update([
-                'name'        => $validated['name'],
-                'code'        => !empty($validated['code']) ? strtoupper(trim($validated['code'])) : null,
-                'description' => $validated['description'] ?? null,
-                'is_active'   => $validated['is_active'] ?? $subject->is_active,
+                'name'                    => $validated['name'],
+                'code'                    => !empty($validated['code']) ? strtoupper(trim($validated['code'])) : null,
+                'description'             => $validated['description'] ?? null,
+                'is_active'               => $validated['is_active'] ?? $subject->is_active,
+                'level_id'                => $validated['level_id'] ?? null,
+                'sms_enroll_student'      => $request->has('sms_enroll_student'),
+                'notify_teacher_enroll'   => $request->has('notify_teacher_enroll'),
+                'notify_teacher_zero_fee' => $request->has('notify_teacher_zero_fee'),
+                'attendance_device_id'    => $validated['attendance_device_id'] ?? null,
             ]);
 
             $subject->teachers()->sync($validated['teacher_ids']);
@@ -246,7 +269,7 @@ class SubjectController extends Controller
             $fileName = 'subjects_' . date('Ymd_His');
 
             // Build filtered query (SoftDeletes auto-scopes deleted_at)
-            $query = Subject::with('teachers:id,name');
+            $query = Subject::with(['teachers:id,name', 'level:id,name']);
 
             if ($request->filled('search')) {
                 $search = trim($request->search);

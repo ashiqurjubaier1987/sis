@@ -40,7 +40,26 @@ class Subject extends Model
         'code',
         'description',
         'is_active',
+        'level_id',
+        'sms_enroll_student',
+        'notify_teacher_enroll',
+        'notify_teacher_zero_fee',
+        'attendance_device_id',
     ];
+
+    protected $casts = [
+        'sms_enroll_student'      => 'boolean',
+        'notify_teacher_enroll'   => 'boolean',
+        'notify_teacher_zero_fee' => 'boolean',
+    ];
+
+    /**
+     * Get the academic level for this subject.
+     */
+    public function level()
+    {
+        return $this->belongsTo(AcademicLevel::class, 'level_id');
+    }
 
     /**
      * Get the teachers assigned to this subject.

@@ -119,6 +119,26 @@
                                 </div>
                             </div>
 
+                            {{-- Academic Level --}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="f-w-600">Academic Level <span class="text-danger">*</span></label>
+                                    <select name="level_id" id="level_id"
+                                        class="form-control @error('level_id') is-invalid @enderror" required>
+                                        <option value="">— Select Level —</option>
+                                        @foreach ($levels as $level)
+                                            <option value="{{ $level->id }}"
+                                                {{ old('level_id', $subject->level_id) == $level->id ? 'selected' : '' }}>
+                                                {{ $level->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('level_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
                             {{-- Assign Teachers --}}
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -157,6 +177,60 @@
                                                value="{{ old('is_active', $subject->is_active) }}">
                                     </div>
                                     <small class="form-text text-muted">Active subjects are visible across the system.</small>
+                                </div>
+                            </div>
+
+                            {{-- Attendance Device ID --}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="f-w-600">Attendance Device ID</label>
+                                    <input type="number" name="attendance_device_id" id="attendance_device_id"
+                                        class="form-control @error('attendance_device_id') is-invalid @enderror"
+                                        placeholder="e.g. 101"
+                                        value="{{ old('attendance_device_id', $subject->attendance_device_id) }}">
+                                    @error('attendance_device_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Optional. Link to attendance hardware device.</small>
+                                </div>
+                            </div>
+
+                            {{-- Notification Settings --}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="f-w-600">Notification Settings</label>
+                                    <div class="m-t-10">
+                                        <div class="checkbox-fade fade-in-primary m-b-10">
+                                            <label>
+                                                <input type="checkbox" name="sms_enroll_student" value="1"
+                                                    {{ old('sms_enroll_student', $subject->sms_enroll_student) ? 'checked' : '' }}>
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span>
+                                                <span>SMS student on enrollment</span>
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-fade fade-in-primary m-b-10">
+                                            <label>
+                                                <input type="checkbox" name="notify_teacher_enroll" value="1"
+                                                    {{ old('notify_teacher_enroll', $subject->notify_teacher_enroll) ? 'checked' : '' }}>
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span>
+                                                <span>Notify teacher when student enrolls</span>
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-fade fade-in-primary">
+                                            <label>
+                                                <input type="checkbox" name="notify_teacher_zero_fee" value="1"
+                                                    {{ old('notify_teacher_zero_fee', $subject->notify_teacher_zero_fee) ? 'checked' : '' }}>
+                                                <span class="cr">
+                                                    <i class="cr-icon icofont icofont-ui-check txt-primary"></i>
+                                                </span>
+                                                <span>Notify teacher when zero fee is entered</span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -205,7 +279,8 @@
 <script>
 $(document).ready(function () {
 
-    // Select2 — Teacher dropdown (multiple)
+    // Select2 — dropdowns
+    $('#level_id').select2({ placeholder: '— Select Level —', allowClear: true, width: '100%' });
     $('#teacher_ids').select2({ placeholder: '— Select Teacher(s) —', allowClear: true, width: '100%' });
 
     // Switchery — Status toggle

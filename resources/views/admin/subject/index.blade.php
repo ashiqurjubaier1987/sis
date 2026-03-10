@@ -227,12 +227,24 @@
                             <td id="show_code">—</td>
                         </tr>
                         <tr>
+                            <th class="text-muted f-w-600 p-l-20">Level</th>
+                            <td id="show_level">—</td>
+                        </tr>
+                        <tr>
                             <th class="text-muted f-w-600 p-l-20">Teacher(s)</th>
                             <td id="show_teachers">—</td>
                         </tr>
                         <tr>
                             <th class="text-muted f-w-600 p-l-20">Description</th>
                             <td id="show_description">—</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted f-w-600 p-l-20">Notifications</th>
+                            <td id="show_notifications">—</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted f-w-600 p-l-20">Device ID</th>
+                            <td id="show_device_id">—</td>
                         </tr>
                         <tr>
                             <th class="text-muted f-w-600 p-l-20">Status</th>
@@ -424,7 +436,9 @@
                     <div class="card-block">
                         <h5 class="m-b-3">${s.name}</h5>
                         <span class="subj-code"># ${s.code}</span>
-                        <p class="f-13 m-b-0"><i class="feather icon-user f-12 m-r-5"></i>${teacherNames(s.teachers)}</p>
+                        <p class="f-13 m-b-0">
+                        ${s.level ? `<i class="feather icon-layers f-12 m-r-5"></i><span class="m-r-20">${s.level.name}</span>` : ''}
+                        <i class="feather icon-user f-12 m-r-5"></i>${teacherNames(s.teachers)}</p>
                     </div>
                     <div class="card-footer">
                         ${statusBadge(s.is_active)}
@@ -558,8 +572,17 @@
                         $('#show_name').text(s.name);
                         $('#show_code').html(
                             `<span class="text-c-blue f-w-600">${s.code}</span>`);
+                        $('#show_level').text(s.level ? s.level.name : '—');
                         $('#show_teachers').html(teacherNames(s.teachers));
                         $('#show_description').text(s.description || '—');
+
+                        var notifs = [];
+                        if (s.sms_enroll_student) notifs.push('SMS on enrollment');
+                        if (s.notify_teacher_enroll) notifs.push('Notify teacher on enroll');
+                        if (s.notify_teacher_zero_fee) notifs.push('Notify teacher on zero fee');
+                        $('#show_notifications').html(notifs.length ? notifs.join('<br>') : '—');
+                        $('#show_device_id').text(s.attendance_device_id || '—');
+
                         $('#show_status').html(statusBadge(s.is_active));
                         $('#show_created_at').text(
                             new Date(s.created_at).toLocaleDateString('en-GB', {
